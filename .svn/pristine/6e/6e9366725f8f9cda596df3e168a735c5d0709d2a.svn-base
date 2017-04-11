@@ -1,0 +1,71 @@
+<template>
+  <div class="my">
+    <div class="topBg"></div>
+    <div class="avatar">
+      <img :src="my.avatar">
+    </div>
+    <div class="nickName">微信号：{{ my.nickname }}</div>
+    <div class="optionContainer">
+      <ul class="first">
+        <li>
+          <my-item :title="'我的约稿'" :urlnum="0"></my-item>
+        </li>
+      </ul>
+    </div>
+  </div>
+</template>
+<script type="text/javascript">
+import myItem from '../MyItem/MyItem.vue';
+export default{
+  data () {
+    return {
+      my: Object
+    };
+  },
+  vuex: {
+    getters: {
+      prefix: ({ user }) => user.prefix
+    }
+  },
+  created () {
+    this.$http.get(this.prefix + '/getmy', {openid: 1})
+    .then(res => {
+      console.log(res.body.reData);
+      this.my = res.body.reData;
+    });
+  },
+  components: {
+    myItem
+  }
+};
+</script>
+<style lang="stylus">
+  .topBg
+    position: absolute
+    top: 0
+    width: 100%
+    height: 139px
+    background: url(375x139.png) left top no-repeat
+  .avatar
+    position: absolute
+    top: 86px
+    left: 50%
+    margin-left: -37px
+    width: 74px
+    height: 74px
+    border-radius: 50%
+    border: 1px solid #fff
+    img
+      border-radius: 50%
+  .nickName
+    margin-top: 170px
+    font-size: 14px
+    color: #646464
+    text-align: center
+  .optionContainer
+    ul
+      margin: 0
+      padding: 0
+      li
+        list-style: none
+</style>

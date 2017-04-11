@@ -1,0 +1,26 @@
+import Vue from 'vue';
+import App from './App';
+import VueResource from 'vue-resource';
+import VueRouter from 'vue-router';
+import routerConfig from './routerConfig';
+
+Vue.use(VueRouter);
+Vue.use(VueResource);
+
+var router = new VueRouter({
+  linkActiveClass: 'active'
+});
+
+routerConfig(router);
+
+// For every new route scroll to the top of the page
+router.beforeEach(function () {
+  window.scrollTo(0, 0);
+});
+
+// If no route is matched redirect home
+router.redirect({
+  '*': '/activity'
+});
+
+router.start(App, '#app');

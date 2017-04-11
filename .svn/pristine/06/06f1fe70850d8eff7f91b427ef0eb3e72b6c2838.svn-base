@@ -1,0 +1,108 @@
+<template>
+  <div class="points">
+    <div class="pointsTop">
+      <span>我的积分</span>
+      <span class="score">{{score}}分</span>
+    </div>
+    <ul class="pointsContact">
+      <li v-for="pointsInfo in pointsInfos">
+        <div class="pointsTitle">
+          <div class="title">{{pointsInfo.IntegralName}}</div>
+          <div class="time">{{pointsInfo.IntegralTime}}</div>
+        </div>
+        <span class="pointsScore">+{{pointsInfo.IntegralScore}}</span>
+      </li>
+      
+    </ul>
+  </div>
+</template>
+<script>
+  export default {
+    data () {
+      return {
+        pointsInfos: [],
+        score: 0
+      };
+    },
+    vuex: {
+      getters: {
+        prefix: ({ user }) => user.prefix,
+        openid: ({ user }) => user.userInfo.openid
+      }
+    },
+    created () {
+      this.$toast.config({
+        position: 'center center',
+        duration: 1000
+      });
+      this.$http.post(this.prefix + 'User/Wechat/integral', {openid: this.openid})
+      .then(res => {
+        if (res.body.message === '用户不存在!') {
+          this.loading = false;
+          this.$toast.error('请先绑定工号');
+          setTimeout(() => {
+            this.$router.go('/binding');
+          }, 1500);
+          return;
+        }
+        this.pointsInfos = res.body.resData.details;
+        if (!res.body.resData.credits) {
+          return;
+        }
+        this.score = res.body.resData.credits;
+      });
+    }
+  };
+</script>
+<style lang="stylus">
+  @import '../../../static/css/border-1px.styl'
+  .points
+    position: absolute
+    top: 0
+    bottom: 0
+    width: 100%
+    background: #f0f0f5
+    .pointsTop
+      width: 100%
+      height: 60px
+      line-height: 60px
+      padding: 0 12px
+      box-sizing: border-box
+      background: #ffffff
+      font-size: 16px
+      color: #353535
+      .score
+        font-size: 18px
+        float:right
+    .pointsContact
+      padding: 0
+      margin: 0
+      list-style: none
+      margin-top: 10px
+      width: 100%
+      background: #ffffff
+      li
+        height: 64px
+        line-height: 64px
+        width: 100%
+        padding: 0 12px 
+        box-sizing: border-box
+        color: #353535
+        border-1px-bot('#e6e7eb')
+        .pointsTitle
+          float: left
+          line-height: 18px
+          margin-top: 12px
+          .title
+            font-size: 16px
+          .time
+            font-size: 13px
+            color: #b4b4b4
+            margin-top: 5px
+        .pointsScore
+          float: right
+          font-size: 24px
+          font-weight: bold
+        
+          
+</style>

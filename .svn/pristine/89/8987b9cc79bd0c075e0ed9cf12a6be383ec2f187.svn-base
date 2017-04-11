@@ -1,0 +1,139 @@
+<template>
+  <div class="searchPage">
+    <div class="bgContainer">
+      <input :onchange="getResult()" v-model="searchText" type="text" class="searchIpt" v-el:ipt>
+      <div @click="foucsOn()" v-show="showTip" class="inputTip">
+        <i class="search_icon"></i>
+        <span class="text">关键字搜索活动</span>
+      </div>
+    </div>
+    <div class="titleBest" v-show="showTitle">
+      最佳匹配
+    </div>
+    <ul class="resultContainer">
+      <li v-for="searchRe in searchRes" v-link="{ name: 'activedetail', params: {id: searchRe.active_id, done: searchRe.done }}">
+        <active-item :activeinfo="searchRe"></active-item>
+      </li>
+    </ul>
+    <div class="loading" v-show="loading">
+      <img src="timg.gif" height="80" width="80">
+    </div>
+  </div>
+</template>
+<script>
+  import activeItem from '../../components/ActiveItem/ActiveItem.vue';
+  export default {
+    data () {
+      return {
+        searchText: '',
+        searchRes: [],
+        loading: false
+      };
+    },
+    computed: {
+      showTip () {
+        if (this.searchText.length !== 0) {
+          return false;
+        }
+        this.searchRes = [];
+        return true;
+      },
+      showTitle () {
+        if (this.searchRes.length === 0) {
+          return false;
+        }
+        return true;
+      }
+    },
+    vuex: {
+      getters: {
+        prefix: ({ user }) => user.prefix,
+        openid: ({ user }) => user.userInfo.openid
+      }
+    },
+    methods: {
+      foucsOn () {
+        this.$els.ipt.focus();
+      },
+      getResult () {
+        if (this.searchText !== '') {
+          this.$http.get(this.prefix + '/actsearch', {openid: this.openid, text: this.searchText})
+          .then(res => {
+            this.searchRes = res.body.resData.activeInfo;
+          });
+        };
+      }
+    },
+    created () {
+      this.$on('loading', () => {
+        this.loading = true;
+      });
+      this.$on('loaded', () => {
+        this.loading = false;
+      });
+    },
+    components: {
+      activeItem
+    }
+  };
+</script>
+<style lang="stylus">
+  .bgContainer
+    display: flex
+    justify-content: center
+    align-items: center
+    width: 100%
+    height: 55px
+    background-color: #f0f0f5
+    .searchIpt
+      padding: 0 10px
+      box-sizing: border-box
+      width: 90%
+      height: 38px
+      font-size: 13px
+      color: #323232
+      outline: none
+      border: none
+      border: 1px solid #e6e6e6
+      border-radius: 7px
+    .inputTip
+      position: absolute
+      top: 19px
+      left: 50%
+      display: flex
+      justify-content: center
+      align-items: center
+      margin-left: -60px
+      height: 18px
+      font-size: 13px
+      color: #b4b4b4
+      .search_icon
+        width: 18px
+        height: 18px
+        background: url(searchIcon.png) left top no-repeat
+        background-size: 100% 100%
+      .text
+        margin-left: 10px
+  .titleBest
+    padding: 0 12px
+    height: 40px
+    line-height: 40px
+    font-size: 13px
+    color: #323232
+    background-color: #fff
+  .resultContainer
+    margin: 0
+    padding: 0
+    background-color: #f0f0f5
+    li
+      list-style: none
+      margin-bottom: 10px
+      &:last-child
+        margin-bottom: 0
+  .loading
+    position: fixed
+    top: 50%
+    left: 50%
+    margin-left: -40px
+    margin-top: -40px
+</style>

@@ -1,0 +1,137 @@
+<template>
+  <div class="activity">
+    <div class="activeTop">
+      <div class="centerContainer">
+        <span class="activeNotice" @click="switchNotice()" :class="{'active':notice}">活动通知</span>
+        <span class="activeReport" @click="switchReport()" :class="{'active':!notice}">活动报道</span>
+      </div>
+    </div>
+    <div class="scrollWrapper" v-el:scroll>
+      <ul class="activeContainer">
+        <li v-for="activeInfo in activeInfos">
+          <active-item :activeinfo="activeInfo"></active-item>
+        </li>
+      </ul>
+    </div>
+    <div class="loading" v-show="loading">
+      <img src="timg.gif" width="80" height="80">
+    </div>
+    <div class="searchContainer">
+      <search></search>
+    </div>
+  </div>
+</template>
+<script type="text/javascript">
+import activeItem from '../ActiveItem/ActiveItem.vue';
+import search from '../Search/Search.vue';
+import BScroll from 'better-scroll';
+export default{
+  data () {
+    return {
+      activeInfos: [],
+      loading: false,
+      notice: true
+    };
+  },
+  vuex: {
+    getters: {
+      prefix: ({ user }) => user.prefix
+    }
+  },
+  methods: {
+    switchNotice () {
+      this.notice = true;
+    },
+    switchReport () {
+      this.notice = false;
+    }
+  },
+  created () {
+    this.$http.get(this.prefix + '/activeinfo', {openid: 1})
+    .then(res => {
+      if (this.activeInfos.length !== 0) {
+        this.activeInfos = [];
+      }
+      res.body.reData.activeInfo.forEach((item) => {
+        this.activeInfos.push(item);
+      });
+      this.$nextTick(() => {
+        var scroll = new BScroll(this.$els.scroll, {
+          probeType: 1,
+          click: true
+        });
+        scroll.refresh();
+        scroll.on('scroll', (pos) => {
+          if (pos.y > 20) {
+            this.loading = true;
+            this.$http.get(this.prefix + '/activeinfo', {openid: 1})
+            .then(res => {
+              setTimeout(() => {
+                if (this.activeInfos.length !== 0) {
+                  this.activeInfos = [];
+                }
+                res.body.reData.activeInfo.forEach((item) => {
+                  this.activeInfos.push(item);
+                });
+                scroll.refresh();
+                this.loading = false;
+              }, 1000);
+            });
+          }
+        });
+      });
+    });
+  },
+  components: {
+    activeItem,
+    search
+  }
+};
+</script>
+<style lang="stylus">
+.activity
+  position: absolute
+  top: 0px
+  bottom: 89px
+  width: 100%
+  .activeTop
+    display: flex
+    justify-content: center
+    height: 40px
+    width: 100%
+    line-height:40px
+    .activeNotice
+      margin-right:53px
+      font-size:14px
+      color:#323232
+    .activeReport
+      font-size:14px
+      color:#323232
+    .active
+      font-size:16px
+      color:#ef2f48
+  .scrollWrapper
+    overflow: hidden
+    height: 100%
+    background-color: #f0f0f5
+    .activeContainer
+      margin: 0
+      padding: 0
+      li
+        font-size: 12px
+        list-style: none
+        margin-bottom: 10px
+  .loading
+    position: absolute
+    top: 0
+    display: flex
+    align-items: center
+    justify-content: center
+    width: 100%
+    height: 100%
+  .searchContainer{
+    position: fixed
+    bottom: 70px
+    right: 30px
+  }
+</style>

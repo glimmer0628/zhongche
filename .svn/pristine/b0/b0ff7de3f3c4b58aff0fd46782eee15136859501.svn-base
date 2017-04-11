@@ -1,0 +1,15 @@
+<template>
+  <div class="search"></div>
+</template>
+<script>
+export default {
+};
+</script>
+<style lang="stylus">
+  .search
+    height:54px
+    width:54px
+    border-radius:50%
+    box-shadow:0 2px 7px #f13f51
+    background: linear-gradient(45deg, #f13f51, #fdad8f);
+</style>

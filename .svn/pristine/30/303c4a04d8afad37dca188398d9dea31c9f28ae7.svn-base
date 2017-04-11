@@ -1,0 +1,192 @@
+<template>
+  <div class="walking">
+    <!-- <div id="walkingImg"></div> -->
+    <map-item :start="startPath" :end="endPath"></map-item>
+    <div class="rulesContainer">
+      <div class="title">规则说明</div>
+      <div class="htmlInfo" v-html="rulesHtml"></div>
+    </div>
+    <div class="btnContainer">
+      <div class="begin" @click="begin()">开始打卡</div>
+      <div class="end" @click="finish()">结束打卡</div>
+    </div>
+  </div>
+</template>
+<script>
+import mapItem from '../../components/BMap/BMap.vue';
+import BMap from 'BMap';
+import wx from 'weixin-js-sdk';
+export default {
+  data () {
+    return {
+      wechatConfig: {},
+      rulesHtml: '',
+      startPath: '',
+      endPath: '',
+      walksId: '',
+      rightHere: {},
+      beginChecked: false
+    };
+  },
+  vuex: {
+    getters: {
+      prefix: ({ user }) => user.prefix,
+      openid: ({ user }) => user.userInfo.openid,
+      startCode: ({ user }) => user.location.startCode,
+      endCode: ({ user }) => user.location.endCode
+    }
+  },
+  methods: {
+    begin () {
+      let that = this;
+      wx.getLocation({
+        type: 'wgs84', // 默认为wgs84的gps坐标，如果要返回直接给openLocation用的火星坐标，可传入'gcj02'
+        success: function (res) {
+          let convertor = new BMap.Convertor();
+          let ggPoint = new BMap.Point(res.longitude, res.latitude);
+          let pointArr = [];
+          pointArr.push(ggPoint);
+          convertor.translate(pointArr, 3, 5, (data) => {
+            that.rightHere = data.points[0];
+            let checkLat = false;
+            let checkLng = false;
+            if (that.startCode.lat - 0.018 < that.rightHere.lat && that.startCode.lat + 0.018 > that.rightHere.lat) {
+              checkLat = true;
+            }
+            if (that.startCode.lng - 0.018 < that.rightHere.lng && that.startCode.lng + 0.018 > that.rightHere.lng) {
+              checkLng = true;
+            }
+            if (checkLat && checkLng) {
+              if (!that.beginChecked) {
+                that.$http.post(that.prefix + 'Sports/Wechat/sportsSign', {openid: that.openid, walksId: that.walksId})
+                .then(res => {
+                  that.beginChecked = true;
+                  window.alert('打卡成功！');
+                });
+              } else {
+                window.alert('不能重复打卡');
+              }
+            } else {
+              window.alert('偏离起点');
+            }
+          });
+        }
+      });
+    },
+    finish () {
+      if (!this.beginChecked) {
+        window.alert('请先开始行程！');
+        return;
+      }
+      let that = this;
+      wx.getLocation({
+        type: 'wgs84', // 默认为wgs84的gps坐标，如果要返回直接给openLocation用的火星坐标，可传入'gcj02'
+        success: function (res) {
+          let convertor = new BMap.Convertor();
+          let ggPoint = new BMap.Point(res.longitude, res.latitude);
+          let pointArr = [];
+          pointArr.push(ggPoint);
+          convertor.translate(pointArr, 3, 5, (data) => {
+            that.rightHere = data.points[0];
+            let checkLat = false;
+            let checkLng = false;
+            if (that.endCode.lat - 0.0018 < that.rightHere.lat && that.endCode.lat + 0.0018 > that.rightHere.lat) {
+              checkLat = true;
+            }
+            if (that.endCode.lng - 0.0018 < that.rightHere.lng && that.endCode.lng + 0.0018 > that.rightHere.lng) {
+              checkLng = true;
+            }
+            if (checkLat && checkLng) {
+              that.$http.post(that.prefix + 'Sports/Wechat/sportsSign', {openid: that.openid, walksId: that.walksId})
+              .then(res => {
+                window.alert(JSON.stringify(res));
+                window.alert('行程完毕！');
+                that.beginChecked = false;
+              });
+            } else {
+              window.alert('偏离终点');
+            }
+          });
+        }
+      });
+    }
+  },
+  created () {
+    this.$toast.config({
+      position: 'center center',
+      duration: 1000
+    });
+    this.$http.post(this.prefix + 'Sports/Wechat/getconfig', {openid: this.openid})
+    .then(res => {
+      if (res.body.message === '用户不存在!') {
+        this.loading = false;
+        this.$toast.error('请先绑定工号');
+        setTimeout(() => {
+          this.$router.go('/binding');
+        }, 1500);
+        return;
+      }
+      this.wechatConfig = res.body.resData.wechatConfig;
+      this.rulesHtml = res.body.resData.rulesHtml;
+      this.startPath = res.body.resData.startPath;
+      this.endPath = res.body.resData.endPath;
+      this.walksId = res.body.resData.walksId;
+      this.$broadcast('countLocation');
+      if (!this.wechatConfig) {
+        window.alert('获取微信授权失败');
+        return;
+      }
+      wx.config({
+        debug: true,
+        appId: this.wechatConfig.appId,
+        timestamp: this.wechatConfig.timestamp,
+        nonceStr: this.wechatConfig.nonceStr,
+        signature: this.wechatConfig.signature,
+        jsApiList: ['getLocation']
+      });
+    });
+  },
+  components: {
+    mapItem
+  }
+};
+</script>
+<style lang="stylus">
+  .walking
+    position: relative
+    font-size: 0
+    .walkingImg
+      width: 100%
+      height: 360px
+    .rulesContainer
+      padding: 20px 12px 91px 12px
+      .title
+        margin-bottom: 15px
+        font-size: 15px
+        color: #323232
+        font-weight: bold
+      .htmlInfo
+        font-size: 13px
+        color: #353535
+    .btnContainer
+      position: absolute
+      bottom: 0
+      display: flex
+      justify-content: space-between
+      padding: 0 22px
+      width: 100%
+      box-sizing: border-box
+      font-size: 15px
+      &>div
+        display: flex
+        justify-content: center
+        align-items: center
+        width: 45%
+        height: 44px
+        border-radius: 22px
+        color: #fff
+      .begin
+        background: linear-gradient(90deg, #fc556b, #ef2f48)
+      .end
+        background: linear-gradient(90deg, #35c7ba, #23a398)
+</style>

@@ -1,0 +1,176 @@
+<template>
+  <div class="news">
+    <ul class="newsTop">
+      <li @click="switchNews(2)" v-link="{path: '/news', query: {num: 2}}" :class="{'active1':changetext[0]}">
+        <div class="textContainer">
+          <div class="news_img1"></div>
+          <span>每周一讲</span>
+        </div>
+      </li>
+      <li @click="switchNews(4)" v-link="{path: '/news', query: {num: 4}}" :class="{'active2':changetext[2]}">
+        <div class="textContainer">
+          <div class="news_img2"></div>
+          <span>往期回顾</span>
+        </div>
+      </li>
+      <li @click="switchNews(3)" v-link="{path: '/news', query: {num: 3}}" :class="{'active3':changetext[1]}">
+        <div class="textContainer">
+          <div class="news_img3"></div>
+          <span>生活百科</span>
+        </div>
+      </li>
+      <li @click="switchNews(5)" v-link="{path: '/news', query: {num: 99}}" :class="{'active4':changetext[3]}">
+        <div class="textContainer">
+          <div class="news_img4"></div>
+          <span>职工书屋</span>
+        </div>
+      </li>
+    </ul>
+    <router-view></router-view>
+    <ul class="newsContent">
+      <li v-link="{ name: 'detailinfo', params: {detailid: reportInfo.system_id}}" v-for="reportInfo in reportInfos">
+        <report-item :reportinfo="reportInfo"></report-item>
+      </li>
+    </ul>
+    <div class="loading" v-show="onLoading">
+      <img src="timg.gif" height="80" width="80">
+    </div>
+  </div>
+</template>
+<script type="text/javascript">
+import reportItem from '../ReportItem/ReportItem.vue';
+export default{
+  components: {
+    reportItem
+  },
+  data () {
+    return {
+      reportInfos: [],
+      onLoading: false,
+      changetext: [true, false, false, false]
+    };
+  },
+  vuex: {
+    getters: {
+      prefix: ({ user }) => user.prefix
+    }
+  },
+  methods: {
+    switchNews (num) {
+      let changeArr = [false, false, false, false];
+      changeArr[num - 2] = true;
+      this.changetext = changeArr;
+      if (num === 5) {
+        this.reportInfos = [];
+        return;
+      }
+      this.onLoading = true;
+      this.$http.post(this.prefix + 'News/Wechat/getnews', {type: num}).then(res => {
+        this.reportInfos = res.body.resData.news;
+        window.scrollTo(0, 0);
+        this.onLoading = false;
+      });
+    }
+  },
+  created () {
+    let changeArr = [false, false, false, false];
+    if (this.$route.query.num === '99') {
+      changeArr[3] = true;
+      this.changetext = changeArr;
+      return;
+    }
+    changeArr[this.$route.query.num - 2] = true;
+    this.changetext = changeArr;
+    this.onLoading = true;
+    this.$http.post(this.prefix + 'News/Wechat/getnews', {type: this.$route.query.num})
+    .then(res => {
+      this.reportInfos = res.body.resData.news;
+      this.onLoading = false;
+    });
+  }
+};
+</script>
+<style lang="stylus">
+  .news
+    position: absolute
+    top: 0px
+    bottom: 49px
+    width: 100%
+    background: #F0F0F5
+    .newsTop
+      padding: 0
+      margin: 0
+      height: 110px
+      width: 100%
+      display:flex
+      background: #ffffff
+      li
+        display: flex
+        justify-content: center
+        align-items: center
+        flex: 1
+        list-style: none
+        flex-direction: column
+        justify-content: center
+        width: 53px
+        // margin-top: 18px
+        font-size: 12px
+        color: #646464
+        .textContainer
+          &>div
+            width: 52px
+            height: 52px
+            margin-bottom:10px
+            text-align: center
+            line-height: 52px
+            &.news_img1
+              background: url("week.png")
+              background-size: 100% 100%
+            &.news_img2
+              background: url("retrospect.png")
+              background-size: 100% 100%
+            &.news_img3
+              background: url("encyclopedia.png")
+              background-size: 100% 100%
+            &.news_img4
+              background: url("study.png")
+              background-size: 100% 100%
+        &.active1
+          .textContainer
+            color: #F8CED4
+            .news_img1
+              background: url("week-fill.png")
+              background-size: 100% 100%
+        &.active2
+          .textContainer
+            color: #F8CED4
+            .news_img2
+              background: url("retrospect-fill.png")
+              background-size: 100% 100%
+        &.active3
+          .textContainer
+            color: #F8CED4
+            .news_img3
+              background: url("encyclopedia-fill.png")
+              background-size: 100% 100%
+        &.active4
+          .textContainer
+            color: #F8CED4
+            .news_img4
+              background: url("study-fill.png")
+              background-size: 100% 100%
+    .newsContent
+      padding: 0
+      margin: 0
+      margin-top: 8px
+      margin-bottom: 49px
+      background: #ffffff
+      &>li
+        list-style: none
+    .loading
+      position: fixed
+      top: 50%
+      left: 50%
+      margin-left: -40px
+      margin-top: -40px
+</style>

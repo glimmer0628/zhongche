@@ -1,0 +1,21 @@
+<template>
+  <div class="Vote">
+    <vote-item></vote-item>
+  </div>
+</template>
+<script>
+import voteItem from '../../components/VoteItem/VoteItem.vue';
+export default {
+  components: {
+    voteItem
+  }
+};
+</script>
+<style lang="stylus">
+.Vote
+  position: absolute
+  top: 0
+  bottom: 0
+  background: #ffffff
+  width: 100% 
+</style>

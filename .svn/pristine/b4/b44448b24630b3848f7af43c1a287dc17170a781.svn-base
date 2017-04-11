@@ -1,0 +1,71 @@
+<template>
+  <div class="enroll">
+    <ul class="enrollContainer">
+      <li class="enrollLi" v-for="activeInfo in activeInfos" v-link="{ name: 'activedetail', params: {id: activeInfo.active_id, done: activeInfo.done }}">
+        <active-item :activeinfo="activeInfo"></active-item>
+      </li>
+    </ul>
+    <div class="loading" v-if="loading">
+      <img src="timg.gif" height="80" width="80">
+    </div>
+  </div>
+</template>
+<script>
+  import activeItem from '../../components/ActiveItem/ActiveItem.vue';
+  export default {
+    data () {
+      return {
+        activeInfos: [],
+        loading: false
+      };
+    },
+    vuex: {
+      getters: {
+        prefix: ({ user }) => user.prefix,
+        openid: ({ user }) => user.userInfo.prefix
+      }
+    },
+    created () {
+      this.$on('loading', () => {
+        this.loading = true;
+      });
+      this.$on('loaded', () => {
+        this.loading = false;
+      });
+      this.$http.get(this.prefix + '/activeinfo', { openid: this.openid })
+      .then(res => {
+        let resArr = [];
+        res.body.resData.activeInfo.forEach(item => {
+          if (item.done === true) {
+            resArr.push(item);
+          }
+        });
+        this.activeInfos = resArr;
+      });
+    },
+    components: {
+      activeItem
+    }
+  };
+</script>
+<style lang="stylus">
+.enroll
+  position: absolute
+  top: 0
+  bottom: 0
+  width: 100%
+  background-color: #f0f0f5
+  .enrollContainer
+    margin: 0
+    padding: 0
+    background-color: #f0f0f5
+    .enrollLi
+      margin-bottom: 10px
+      list-style: none
+  .loading
+    position: fixed
+    top: 50%
+    left: 50%
+    margin-left: -40px
+    margin-top: -40px
+</style>

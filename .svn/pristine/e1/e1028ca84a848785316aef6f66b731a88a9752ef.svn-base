@@ -1,0 +1,19 @@
+<template>
+  <div class="search"></div>
+</template>
+<script>
+export default {
+};
+</script>
+<style lang="stylus">
+  .search
+    position:fixed
+    z-index:100
+    right:40px
+    bottom:140px
+    height:54px
+    width:54px
+    border-radius:50%
+    box-shadow:0 3px 6px red
+    background:red
+</style>

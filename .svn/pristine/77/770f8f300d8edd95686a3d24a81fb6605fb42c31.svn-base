@@ -1,0 +1,312 @@
+<template>
+  <div class="rights">
+    <ul class="rightsTop">
+      <li @click="switchNews(4)" :class="{'active':changetext[0]}">工作制度</li>
+      <li @click="switchNews(5)" :class="{'active':changetext[1]}">法规宣教</li>
+      <li @click="switchNews(6)" :class="{'active':changetext[2]}">我要留言</li>
+    </ul>
+    <ul class="rightsContent" v-show="!changetext[2]">
+      <li v-for="reportInfo in reportInfos">
+        <report-item :reportinfo="reportInfo"></report-item>
+      </li>
+    </ul>
+    <div class="message" v-show="changetext[2]">
+      <ul class="messageitem">
+        <li>
+          <div class="messageLeft">姓名</div>
+          <div class="messageRight">
+            <span>{{username}}</span>
+          </div>
+        </li>
+        <li>
+          <div class="messageLeft">手机号</div>
+          <div class="messageRight">
+            <input class="phone" type="text" v-model="phone" placeholder="请输入手机号">
+          </div>
+        </li>
+        <li>
+          <div class="messageLeft">留言种类</div>
+          <div class="messageRight messageType" @click="pickerShow()">
+            <span class="type">请选择</span>
+            <div class="choose"></div>
+          </div>
+        </li>
+        <li>
+          <div class="messageLeft">留言详情</div>
+          <div class="messageRight">
+            <textarea v-model="comment" class="details" cols="24" rows="6" placeholder="请输入留言详情"></textarea>
+          </div>
+        </li>
+      </ul>
+      <div class="submititem">
+        <button class="submit" @click="submit()">提交</button>
+      </div>
+      <div class="boutique">
+        <div class="boutiqueTitle">精品留言</div>
+        <div class="boutiqueCon">
+          <ul class="boutiqueContent">
+            <li v-for="messageInfo in messageInfos">
+              <message-item :messageinfo="messageInfo"></message-item>
+            </li>
+          </ul>
+          <div class="look" @click="lookMore()">{{lookmore}}</div>
+        </div>
+      </div>
+      <div class="explain">
+        <div class="explainTitle">留言说明</div>
+        <div class="explainCon">
+          <p>自由维权: 自己的合法权益受到了侵犯，请选择该种类</p>
+          <p>我的建议: 您有好的建议，请选择该种类给我们留言</p>
+          <p>心灵驿站: 当您需要我们的心理专家的时候，请留言给我们。</p>
+          <p>当然，如果您有其它好的想法或者觉得留言不方便，可以直接发送邮件到我们的邮箱，或电话联系我们。</p>
+          <p>1.联系电话: {{contact.phone}}</p>
+          <p>2.电子邮箱: {{contact.email}}</p>
+        </div>
+      </div>
+    </div>
+    <div class="loading" v-show="onLoading">
+      <img src="timg.gif" height="80" width="80">
+    </div>
+  </div>
+</template>
+<script type="text/javascript">
+import reportItem from '../ReportItem/ReportItem.vue';
+import messageItem from '../MessageItem/MessageItem.vue';
+import Picker from 'better-picker';
+export default{
+  components: {
+    reportItem,
+    messageItem
+  },
+  data () {
+    return {
+      username: '',
+      phone: '',
+      // type: '',
+      comment: '',
+      contact: [],
+      reportInfos: [],
+      messageInfos: [],
+      lookmore: '查看更多留言',
+      num: 0,
+      onLoading: false,
+      changetext: [true, false, false],
+      picker: {}
+    };
+  },
+  vuex: {
+    getters: {
+      prefix: ({ user }) => user.prefix,
+      openid: ({ user }) => user.userInfo.openid
+    }
+  },
+  methods: {
+    switchNews (num) {
+      let changeArr = [false, false, false];
+      changeArr[num - 4] = true;
+      this.changetext = changeArr;
+      if (num !== 6) {
+        this.onLoading = true;
+        this.$http.get(this.prefix + '/getnews', {type: num}).then(res => {
+          this.reportInfos = res.body.resData.news;
+          window.scrollTo(0, 0);
+          this.onLoading = false;
+        });
+      }
+    },
+    lookMore () {
+      this.num = this.num + 3;
+      this.onLoading = true;
+      this.$http.get(this.prefix + '/viewMore', {messageNum: this.num}).then(res => {
+        let resArr = [];
+        resArr = this.messageInfos;
+        res.body.resData.pro_message.forEach(item => {
+          resArr.push(item);
+        });
+        this.messageInfos = resArr;
+        if (res.body.resData.pro_message.length < 3) {
+          this.lookmore = '没有更多留言';
+        }
+        this.onLoading = false;
+      });
+    },
+    submit () {
+      this.$http.get(this.prefix + '/messageSubmit', {openid: this.openid, message_phone: this.phone, message_detail: this.comment}).then(res => {
+      });
+    },
+    pickerShow () {
+      if (this.picker) {
+        this.picker.show();
+      }
+    }
+  },
+  created () {
+    this.onLoading = true;
+    this.$http.get(this.prefix + '/getnews', {type: 4}).then(res => {
+      this.reportInfos = res.body.resData.news;
+      this.onLoading = false;
+    });
+    this.$http.get(this.prefix + '/getmessage', {openid: this.openid, messageNum: 0}).then(res => {
+      console.log(res.body.resData.contact);
+      this.username = res.body.resData.username;
+      this.contact = res.body.resData.contact;
+      this.messageInfos = res.body.resData.pro_message;
+    });
+    this.$nextTick(() => {
+      this.picker = new Picker({
+        data: [[
+          {
+            text: '测试1',
+            value: 1
+          },
+          {
+            text: '测试2',
+            value: 2
+          },
+          {
+            text: '测试3',
+            value: 3
+          }
+        ]],
+        selectedIndex: [0],
+        title: '我们都是小学生'
+      });
+      this.picker.hide();
+    });
+  }
+};
+</script>
+<style lang="stylus">
+  @import '../../../static/css/border-1px.styl'
+  .rights
+    position: absolute
+    top: 0px
+    bottom: 49px
+    width: 100%
+    background: #F0F0F5
+    .rightsTop
+      padding: 0
+      margin: 0
+      list-style: none
+      height:40px
+      width: 100%
+      display:flex
+      justify-content:space-around
+      background: #ffffff
+      border-1px-bot('#e6e6e6')
+      li
+        line-height:40px
+        font-size:14px
+        padding: 0 12px
+        &.active
+          border-bottom: 1px solid #EF2F48
+          color: #EF2F48
+    .rightsContent
+      padding: 0
+      margin: 0
+      margin-bottom: 49px
+      background: #ffffff 
+      &>li
+        list-style: none
+    .message
+      .messageitem
+        padding: 0
+        margin: 0
+        background: #ffffff
+        &>li
+          width: 100%
+          height: 50px
+          border-1px-bot('#e6e6e6')
+          display: flex
+          &:last-child
+            height: 133px
+          .messageLeft
+            flex: 3
+            display: flex
+            justify-content: center
+            padding-top: 16px
+            font-size: 15px
+            color: #808080
+            border-1px-right('#e6e6e6')
+          .messageRight
+            flex: 10
+            padding-top: 16px
+            padding-left: 20px
+            font-size: 15px
+            color: #323232
+            &.messageType
+              display: flex
+              justify-content: space-between
+            .phone
+              border: 0
+              outline: none
+            .details
+              width: 90%
+              height: 100%
+              border: 0
+              outline: none
+              resize: none
+            .choose
+              margin-right: 12px
+              width: 9px
+              height: 15px
+              background: url(arrow_icon.png) left top no-repeat
+              background-size: 100% 100%
+      .submititem
+        background: #ffffff
+        width: 100% 
+        .submit
+          margin:30px 13%
+          width: 74%
+          height: 45px
+          background: #F33A52
+          color: #ffffff
+          border-radius: 25px
+          border: 0
+          box-shadow: 0 0 6px #F33A52 
+          outline: none
+      .boutique
+        padding: 0 12px
+        background: #ffffff
+        .boutiqueTitle
+          font-size: 16px
+          font-weight: bold
+        .boutiqueCon
+          margin-top: 7px
+          .boutiqueContent
+            padding: 0
+            margin: 0
+            list-style: none
+          .look
+            width: 100%
+            height: 45px
+            text-align: center
+            line-height: 45px
+            font-size: 14px
+            color: #B4B4B4
+      .explain
+        padding: 22px 12px
+        margin-bottom: 49px
+        background: #F0F0F5
+        .explainTitle
+          font-size: 16px
+          font-weight: bold
+        .explainCon
+          font-size: 14px
+          line-height: 24px
+          padding-top: 15px
+          color: #353535
+          p
+            margin: 0
+    .loading
+      position: absolute
+      top: 0
+      bottom: 49px
+      display: flex
+      justify-content: center
+      align-items: center
+      width: 100% 
+  .picker
+    ul
+      padding: 0
+</style>

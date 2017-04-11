@@ -1,0 +1,12 @@
+<template>
+  <div class="ranking">
+    ranking
+  </div>
+</template>
+<script>
+  export default {
+  };
+</script>
+<style lang="stylus">
+  
+</style>

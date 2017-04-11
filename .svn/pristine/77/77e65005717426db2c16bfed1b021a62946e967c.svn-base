@@ -1,0 +1,47 @@
+<template>
+  <div class="detailInfoItem">
+    <div class="headContainer">
+      <div class="title">{{ detailItem.title }}</div>
+      <div class="time">{{ detailItem.time }}</div>
+    </div>
+    <div class="container" v-if="detailItem.video_url">
+        <iframe height=170 width='100%' :src="detailItem.video_url" frameborder=0 'allowfullscreen'></iframe>
+    </div>
+    <div class="infoContainer" v-html="detailItem.info"></div>
+  </div>
+</template>
+<script>
+  export default {
+    props: {
+      detailItem: Object
+    },
+    mounted () {
+      console.log('111');
+    }
+  };
+</script>
+<style lang="stylus">
+  .detailInfoItem
+    padding-top: 19px
+    background-color: #FFF
+    .headContainer
+      margin-bottom: 20px
+      padding: 0 12px
+      .title
+        margin-bottom: 9px
+        word-wrap:break-word
+        font-size: 16px
+        font-weight: bold
+        color: #323232
+      .time
+        font-size: 13px
+        color: #b4b4b4
+    .infoContainer
+      color: #353535
+      font-size: 14px
+      p
+        padding: 0 12px
+        line-height: 1.3!important
+      img
+        width: 100%
+</style>

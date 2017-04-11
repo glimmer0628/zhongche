@@ -1,0 +1,49 @@
+<template>
+  <div class="activity">
+    <ul class="activeContainer">
+      <li v-for="activeInfo in activeInfos">
+        <active-item :activeinfo="activeInfo"></active-item>
+      </li>
+    </ul>
+    <search></search>
+  </div>
+</template>
+<script type="text/javascript">
+import activeItem from '../ActiveItem/ActiveItem.vue';
+import search from '../Search/Search.vue';
+export default{
+  data () {
+    return {
+      activeInfos: []
+    };
+  },
+  created () {
+    this.$http.get('http://rap.taobao.org/mockjsdata/15673/activeinfo')
+    .then(res => {
+      if (this.activeInfos.length !== 0) {
+        this.activeInfos = [];
+      }
+      res.body.reData.activeInfo.forEach((item) => {
+        item.done = false;
+        this.activeInfos.push(item);
+      });
+    });
+  },
+  components: {
+    activeItem,
+    search
+  }
+};
+</script>
+<style lang="stylus">
+  .activeContainer
+    position: absolute
+    top: 40px
+    margin: 0
+    padding: 0
+    margin-bottom: 49px
+    width: 100%
+    li
+      font-size: 12px
+      list-style: none
+</style>

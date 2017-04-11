@@ -1,0 +1,166 @@
+<template>
+  <div class="binding">
+    <div class="blockadeNow">
+      <div class="left">
+        当前关数：第{{ blockadeNum }}关
+      </div>
+      <div class="right" v-link="{path:'/blockade/doneblockade'}">查看关卡</div>
+    </div>
+    <div class="blockadeContainer">
+      <div class="title">选择题</div>
+    </div>
+    <ul class="blockadeUl">
+      <li class="blockadeLi" v-for="blockadeitem in blockade.chooseObj">
+        <blockade-item :itemnum="$index + 1" :blockitem="blockadeitem"></blockade-item>
+      </li>
+    </ul>
+    <div class="submitBtnContainer">
+      <div class="submitBtn" @click="goNext()" :class="{'active': nextBlock}">下一关</div>
+    </div>
+    <div class="loading" v-show="showLoading">
+      <img src="timg.gif" height="80" width="80" alt="">
+    </div>
+    <router-view></router-view>
+  </div>
+</template>
+<script>
+  import blockadeItem from '../../components/BlockadeItem/BlockadeItem.vue';
+  export default {
+    data () {
+      return {
+        blockade: {},
+        blockadeNumArr: ['一', '二', '三', '四'],
+        showLoading: false
+      };
+    },
+    vuex: {
+      getters: {
+        prefix: ({ user }) => user.prefix,
+        openid: ({ user }) => user.userInfo.openid
+      }
+    },
+    computed: {
+      blockadeNum () {
+        return this.blockadeNumArr[this.blockade.num - 1];
+      },
+      nextBlock () {
+        let canPass = 0;
+        if (this.blockade.chooseObj) {
+          this.blockade.chooseObj.forEach(parentItem => {
+            parentItem.subOptions.forEach(item => {
+              if (item.chosenOption === true) {
+                canPass++;
+              }
+            });
+          });
+          if (canPass === this.blockade.chooseObj.length) {
+            return true;
+          }
+          return false;
+        }
+      }
+    },
+    created () {
+      var options = {
+        openid: this.openid
+      };
+      this.$http.get(this.prefix + '/blockade', options)
+      .then(res => {
+        this.blockade = res.body.resData;
+      });
+    },
+    methods: {
+      goNext () {
+        if (this.nextBlock) {
+          this.showLoading = true;
+          let subRes = [];
+          this.blockade.chooseObj.forEach(parentItem => {
+            let itemObj = {};
+            itemObj.subId = parentItem.subId;
+            parentItem.subOptions.forEach(item => {
+              if (item.chosenOption === true) {
+                itemObj.chosenType = item.optionType;
+              }
+            });
+            subRes.push(itemObj);
+          });
+          this.$http.post(this.prefix + '/matchres', {openid: this.openid, subRes: subRes, num: this.blockade.num})
+          .then(res => {
+            if (res.body.resData.nextBlockade) {
+              this.blockade = res.body.resData.nextBlockade;
+              this.showLoading = false;
+              window.scrollTo(0, 0);
+            } else {
+              this.$router.go('/blockade/doneblockade');
+            }
+          });
+        };
+      }
+    },
+    components: {
+      blockadeItem
+    }
+  };
+</script>
+<style lang="stylus">
+  .binding
+    background-color: #f0f0f5
+    .blockadeNow
+      display: flex
+      justify-content: space-between
+      align-items: center
+      padding: 0 12px
+      height: 44px
+      font-size: 13px
+      background-color: #fff
+      .right
+        width: 70px
+        height: 30px
+        line-height: 30px
+        color: #ef2f48
+        border: 1px solid #ef2f48
+        text-align: center
+        border-radius: 4px
+    .blockadeContainer
+      display: flex
+      align-items: center
+      padding: 0 12px
+      height: 40px
+      color: #323232
+      font-size: 15px
+    .blockadeUl
+      margin: 0
+      padding: 0
+      .blockadeLi
+        margin-bottom: 10px
+        list-style: none
+        &:last-child
+          margin-bottom: 0
+    .submitBtnContainer
+      display: flex
+      justify-content: center
+      align-items: center
+      height: 91px
+      .submitBtn
+        display: flex
+        justify-content: center
+        align-items: center
+        box-sizing: border-box
+        width: 275px
+        height: 44px
+        border: 1px solid #999
+        border-radius: 22px
+        background-color: #fff
+        color: #999
+        &.active
+          border: none
+          color: #fff
+          background: linear-gradient(90deg, #fc556b, #ef2f48)
+          box-shadow: 0 1px 8px rgba(246, 67, 91, 0.6)
+    .loading
+      position: fixed
+      top: 50%
+      left: 50%
+      margin-left: -40px
+      margin-top: -40px
+</style>

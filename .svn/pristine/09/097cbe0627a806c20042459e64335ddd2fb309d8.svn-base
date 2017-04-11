@@ -1,0 +1,45 @@
+<template>
+  <div id="allmap" v-bind:style="mapStyle"></div>
+</template>
+<script>
+export default {
+  data () {
+    return {
+      mapStyle: {
+        width: '100%',
+        height: '360px'
+      }
+    };
+  },
+  props: {
+  // 经度
+    longitude: {
+      type: Number,
+      default: 116.404
+    },
+  // 纬度
+    latitude: {
+      type: Number,
+      default: 39.915
+    }
+  },
+  ready () {
+    let BMap = require('BMap');
+    let map = new BMap.Map('allmap');
+    map.centerAndZoom(new BMap.Point(116.404, 39.915), 11);
+    let walking = new BMap.WalkingRoute(map, {renderOptions: {map: map, autoViewport: true}});
+    walking.search('山东省青岛市市北区敦化路卓越世纪中心', '山东省青岛市市南区五四广场');
+    map.enableScrollWheelZoom(true);
+    // 将地址解析结果显示在地图上,并调整地图视野
+    let myGeo = new BMap.Geocoder();
+    myGeo.getPoint('山东省青岛市市北区敦化路卓越世纪中心', function (point) {
+      if (point) {
+        map.centerAndZoom(point, 16);
+        map.addOverlay(new BMap.Marker(point));
+      } else {
+        window.alert('您选择地址没有解析到结果!');
+      }
+    }, '山东省');
+  }
+};
+</script>

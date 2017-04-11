@@ -1,0 +1,48 @@
+export default (router) => {
+  router.map({
+    '/': {
+      component: require('./page/Home/Home.vue'),
+      subRoutes: {
+        'activity': {
+          component: require('./components/Activity/Activity.vue')
+        },
+        'news': {
+          component: require('./components/News/News.vue')
+        },
+        'rights': {
+          component: require('./components/Rights/Rights.vue')
+        },
+        'my': {
+          component: require('./components/My/My.vue')
+        }
+      }
+    },
+    '/enroll': {
+      component: require('./page/Enroll/Enroll.vue')
+    },
+    '/points': {
+      component: require('./page/Points/Points.vue')
+    },
+    '/ranking': {
+      component: require('./page/Ranking/Ranking.vue')
+    },
+    '/changenum': {
+      component: require('./page/ChangeNum/ChangeNum.vue')
+    },
+    '/binding': {
+      component: require('./page/Binding/Binding.vue')
+    },
+    '/blockade': {
+      component: require('./page/Blockade/Blockade.vue')
+    },
+    '/walking': {
+      component: require('./page/Walking/Walking.vue')
+    },
+    '/rules': {
+      component: require('./page/Rules/Rules.vue')
+    },
+    '/search': {
+      component: require('./page/Search/Search.vue')
+    }
+  });
+};

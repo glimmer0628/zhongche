@@ -1,0 +1,194 @@
+<template>
+  <div class="activity">
+    <div class="activeTop">
+      <div class="centerContainer">
+        <span class="activeNotice" @click="switchNotice()" :class="{'active':notice}">活动通知</span>
+        <span class="activeReport" @click="switchReport()" :class="{'active':!notice}">活动报道</span>
+      </div>
+    </div>
+    <div class="scrollWrapper" v-show="notice" v-el:scroll>
+      <ul class="activeContainer">
+        <li v-for="activeInfo in activeInfos">
+          <active-item :activeinfo="activeInfo"></active-item>
+        </li>
+      </ul>
+    </div>
+    <div class="scrollWrapper" v-show="!notice" v-el:rescroll>
+      <ul class="activeContainer">
+        <li class="report" v-for="reportInfo in reportInfos">
+          <report-item :reportinfo="reportInfo"></report-item>
+        </li>
+      </ul>
+    </div>
+    <div class="loading" v-show="loading">
+      <img src="timg.gif" width="80" height="80">
+    </div>
+    <div v-link="{ path: '/search' }" class="searchContainer">
+      <search></search>
+    </div>
+  </div>
+</template>
+<script type="text/javascript">
+import activeItem from '../ActiveItem/ActiveItem.vue';
+import search from '../Search/Search.vue';
+import BScroll from 'better-scroll';
+import reportItem from '../ReportItem/ReportItem.vue';
+export default{
+  data () {
+    return {
+      activeInfos: [],
+      reportInfos: [],
+      loading: false,
+      notice: true,
+      scroll: {}
+    };
+  },
+  vuex: {
+    getters: {
+      prefix: ({ user }) => user.prefix,
+      openid: ({ user }) => user.userInfo.openid
+    }
+  },
+  methods: {
+    switchNotice () {
+      this.loading = true;
+      this.notice = true;
+      this.$http.get(this.prefix + '/activeinfo', {openid: this.openid})
+      .then(res => {
+        this.activeInfos = res.body.reData.activeInfo;
+        this.$nextTick(() => {
+          if (!this.scroll.info) {
+            this.scroll.info = new BScroll(this.$els.scroll, {
+              probeType: 1,
+              click: true
+            });
+          }
+          this.scroll.info.refresh();
+          this.loading = false;
+        });
+      });
+    },
+    switchReport () {
+      this.loading = true;
+      this.notice = false;
+      this.$http.get(this.prefix + '/actreport')
+      .then(res => {
+        this.reportInfos = res.body.reData.actreport;
+        this.$nextTick(() => {
+          if (!this.scroll.report) {
+            this.scroll.report = new BScroll(this.$els.rescroll, {
+              probeType: 1,
+              click: true
+            });
+          }
+          this.scroll.report.refresh();
+          this.loading = false;
+        });
+      });
+    }
+  },
+  created () {
+    // activity info
+    this.loading = true;
+    this.$http.get(this.prefix + '/activeinfo', {openid: this.openid})
+    .then(res => {
+      this.activeInfos = res.body.reData.activeInfo;
+      this.$nextTick(() => {
+        this.scroll.info = new BScroll(this.$els.scroll, {
+          probeType: 1,
+          click: true
+        });
+        this.scroll.info.refresh();
+        this.loading = false;
+        this.scroll.info.on('scroll', (pos) => {
+          if (pos.y > 20) {
+            this.loading = true;
+            this.$http.get(this.prefix + '/activeinfo', {openid: this.openid})
+            .then(res => {
+              setTimeout(() => {
+                this.activeInfos = res.body.reData.activeInfo;
+                this.scroll.info.refresh();
+                this.loading = false;
+              }, 1000);
+            });
+          }
+        });
+      });
+    });
+    // activity report
+    this.$nextTick(() => {
+      this.scroll.report = new BScroll(this.$els.rescroll, {
+        probeType: 1,
+        click: true
+      });
+      this.scroll.report.refresh();
+      this.scroll.report.on('scroll', (pos) => {
+        if (pos.y > 20) {
+          this.loading = true;
+          this.$http.get(this.prefix + '/actreport')
+          .then(res => {
+            setTimeout(() => {
+              this.reportInfos = res.body.reData.actreport;
+              this.scroll.report.refresh();
+              this.loading = false;
+            }, 1000);
+          });
+        }
+      });
+    });
+  },
+  components: {
+    activeItem,
+    search,
+    reportItem
+  }
+};
+</script>
+<style lang="stylus">
+.activity
+  position: absolute
+  top: 0px
+  bottom: 89px
+  width: 100%
+  .activeTop
+    display: flex
+    justify-content: center
+    height: 40px
+    width: 100%
+    line-height:40px
+    .activeNotice
+      margin-right:53px
+      font-size:14px
+      color:#323232
+    .activeReport
+      font-size:14px
+      color:#323232
+    .active
+      font-size:16px
+      color:#ef2f48
+  .scrollWrapper
+    overflow: hidden
+    height: 100%
+    background-color: #f0f0f5
+    .activeContainer
+      margin: 0
+      padding: 0
+      li
+        font-size: 12px
+        list-style: none
+        margin-bottom: 10px
+        &.report
+          margin-bottom: 0
+  .loading
+    position: absolute
+    top: 0
+    display: flex
+    align-items: center
+    justify-content: center
+    width: 100%
+    height: 100%
+  .searchContainer
+    position: fixed
+    bottom: 70px
+    right: 30px
+</style>

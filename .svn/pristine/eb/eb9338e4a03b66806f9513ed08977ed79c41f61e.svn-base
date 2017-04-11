@@ -1,0 +1,3 @@
+// index mutation types
+export const SAVE_OPENID = 'SAVE_OPENID';
+export const SAVE_LOCATION = 'SAVE_LOCATION';

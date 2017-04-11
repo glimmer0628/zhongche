@@ -1,0 +1,124 @@
+<template>
+  <div class="activeDetailContainer">
+    <div class="detailContainer">
+      <detail-info-item :detail-item="html"></detail-info-item>
+    </div>
+    <div class="btnBox">
+      <div class="enrollBtn" @click="enrollBtn()" :class="{'active': enroll}">{{ showEnroll }}</div>
+    </div>
+    <div class="loading" v-show="loading">
+      <img src="timg.gif" height="80" width="80">
+    </div>
+  </div>
+</template>
+<script>
+  import detailInfoItem from '../../components/DetailInfoItem/DetailInfoItem.vue';
+  export default {
+    data () {
+      return {
+        html: {},
+        enroll: true,
+        loading: false
+      };
+    },
+    vuex: {
+      getters: {
+        prefix: ({ user }) => user.prefix,
+        openid: ({ user }) => user.userInfo.openid
+      }
+    },
+    computed: {
+      showEnroll () {
+        if (this.enroll === true) {
+          return '立即报名';
+        }
+        return '我要退赛';
+      }
+    },
+    methods: {
+      enrollBtn () {
+        this.loading = true;
+        this.$http.post(this.prefix + 'Sports/Wechat/enroll', {active_id: this.$route.params.id, openid: this.openid})
+        .then(res => {
+          if (res.body.message === '用户不存在!') {
+            this.loading = false;
+            this.$toast.error('请先绑定工号');
+            setTimeout(() => {
+              this.$router.go('/binding');
+            }, 1500);
+            return;
+          }
+          if (res.body.resData.err_msg === 'ok') {
+            this.enroll = !this.enroll;
+          }
+          this.loading = false;
+        });
+      }
+    },
+    created () {
+      this.$toast.config({
+        position: 'center center',
+        duration: 1000
+      });
+      if (this.$route.params.done === 'true') {
+        this.enroll = false;
+      }
+      this.$http.post(this.prefix + 'News/Wechat/newsdetail', { type: 1, infoid: this.$route.params.id })
+      .then(res => {
+        this.html = res.body.resData;
+      });
+    },
+    components: {
+      detailInfoItem
+    }
+  };
+</script>
+<style lang="stylus">
+.activeDetailContainer
+  position: absolute
+  width: 100%
+  top: 0
+  bottom: 0
+  background-color: #FFF
+  .detailContainer
+    padding-bottom: 90px
+    background-color: #FFF
+  .activeHtml
+    position: absolute
+    top: 0
+    bottom: 90px
+    width: 100%
+    overflow-y: auto
+    background-color: #FFF
+  .btnBox
+    position: fixed
+    bottom: 0
+    display: flex
+    justify-content: center
+    align-items: center
+    width: 100%
+    height: 90px
+    background-color: #FFF
+    .enrollBtn
+      display: flex
+      justify-content: center
+      align-items: center
+      box-sizing: border-box
+      width: 275px
+      height: 44px
+      border: 1px solid #999
+      border-radius: 22px
+      background-color: #fff
+      color: #999
+      &.active
+        border: none
+        color: #fff
+        background: linear-gradient(90deg, #fc556b, #ef2f48)
+        box-shadow: 0 1px 8px rgba(246, 67, 91, 0.6)
+  .loading
+    position: fixed
+    top: 50%
+    left: 50%
+    margin-left: -40px
+    margin-top: -40px
+</style>

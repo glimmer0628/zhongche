@@ -1,0 +1,75 @@
+<template>
+  <div class="Vote">
+    <div class="votecontant">
+      <div class="voteTop">请开始投票</div>
+      <div class="voteContent">
+        <div class="voteTitle">
+          标题标题标题标题标题标题标题标题标题（单选）
+        </div>
+        <ul class="voteOption">
+          <li @click="choose(voteItem)" v-for="voteItem in voteItems">
+            <span class="icon" :class="{'active': voteItem.choose}"></span>
+            <span class="num">{{ $index + 1 }}</span>
+            <span class="content">{{ voteItem.name }}</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+export default {
+  props: {
+    voteItems: Array
+  },
+  methods: {
+    choose (item) {
+      this.$dispatch('option', item.id);
+    }
+  }
+};
+</script>
+<style lang="stylus">
+.Vote
+  margin-top: 15px
+  .votecontant
+    border: 1px solid #cccccc
+    box-sizing: border-box
+    margin: 0 32px
+    border-radius: 5px
+    color: #999999
+    .voteTop
+      height: 55px
+      width: 100%
+      font-size: 16px
+      line-height: 55px
+      text-align: center
+      border-bottom: 1px solid #cccccc
+    .voteContent
+      padding: 0 12px
+      box-sizing: border-box
+      .voteTitle
+        margin: 20px 0
+      .voteOption
+        padding: 0
+        margin: 0
+        list-style: none
+        li
+          height: 40px
+          border-bottom: 1px solid #cccccc
+          display: flex
+          align-items: center
+          &:last-child
+            border-bottom: 0
+          .icon
+            display: inline-block
+            width: 22px
+            height: 22px
+            background: url(choose.png)
+            background-size: 100% 100%
+            margin-right: 5px
+            &.active
+              background-image: url(choose1.png)
+          .num
+            margin-right: 8px
+</style>

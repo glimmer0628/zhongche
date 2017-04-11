@@ -1,0 +1,40 @@
+<template>
+  <div class="rules">
+    <div class="htmlContainer">
+      <p>一、我们需要这样的稿件：</p>
+      <p class="indent">1、稿件内容应该是与中车四方研究所工会各栏目内容紧密相关的以下几类：
+        工会各类活动新闻报道、新闻评论、活动征文、健康保健知识、生活技巧、诗歌散文、绘画摄影分享等。</p>
+      <p class="indent">2、稿件内容积极，论述完整，能够对读者起到指导作用。</p>
+      <p class="indent">3、文章体裁不限，字数不限。</p>
+      <p class="indent">4、稿件内容不可抄袭。</p>
+      <p>二、投稿奖励：</p>
+      <p class="indent">1、参与投稿，投稿成功后奖励5积分（每天最多奖励一次）</p>
+      <p class="indent">2、投稿一经被采用，奖励10积分</p>
+      <p>特别提示：</p>
+      <p class="indent">请按稿件内容投递到相关编辑信箱：1204308794@QQ.com，最好压缩后发送。</p>
+      <p class="indent">来稿者请署名(真实姓名)、分工会名称、联系电话等，以便联系。 </p>
+      <p class="indent">我们保留对稿件的增删权。</p>
+      <p class="indent">作者如愿长期合作，与我们联系：1204308794@QQ.com。</p>
+    </div>
+  </div>
+</template>
+<script>
+  export default {
+  };
+</script>
+<style lang="stylus">
+  .rules
+    padding: 20px 12px 0 12px
+    position: absolute
+    top: 0
+    bottom: 0
+    background: #ffffff
+    width: 100%
+    box-sizing: border-box
+    .htmlContainer
+      .indent
+        text-indent: 2em
+        font-size: 14px
+        line-height: 1.5
+        margin: 5px 0
+</style>

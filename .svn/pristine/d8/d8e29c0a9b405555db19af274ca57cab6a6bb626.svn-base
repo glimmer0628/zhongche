@@ -1,0 +1,35 @@
+<template>
+  <div class="main">
+    <router-view v-wechat-title="$route.meta.title"></router-view>
+  </div>
+</template>
+
+<script>
+import store from './vuex/store.js';
+import { saveOpenId } from './vuex/actions';
+export default {
+  store,
+  vuex: {
+    getters: {
+      openid: ({ user }) => user.userInfo.openid
+    },
+    actions: {
+      saveOpenId
+    }
+  },
+  created () {
+    if (this.$route.query.open) {
+      this.saveOpenId(this.$route.query.id);
+    }
+  }
+};
+</script>
+
+<style lang="stylus">
+  @import '../static/css/normalize.css';
+  html
+    height: 100%
+    background: #f0f0f5
+  body
+    color: #323232
+</style>

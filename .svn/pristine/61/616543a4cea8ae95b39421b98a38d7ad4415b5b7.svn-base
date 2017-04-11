@@ -1,0 +1,112 @@
+<template>
+  <div class="my">
+  </div>
+  <div class="myContainer">
+    <div class="topBg"></div>
+    <div class="avatar">
+      <img :src="my.avatar">
+    </div>
+    <div class="nickName">微信号：{{ my.nickname }}</div>
+    <div class="optionContainer" v-el:myscroll>
+      <ul class="first">
+        <li v-link="{path:'/enroll'}">
+          <my-item :title="'我的报名'" :urlnum="0"></my-item>
+        </li>
+        <li v-link="{path:'/points'}">
+          <my-item :title="'我的积分'" :urlnum="1"></my-item>
+        </li>
+        <li class="block" v-link="{path:'/ranking/ranktog'}">
+          <my-item :title="'查看排名'" :urlnum="2"></my-item>
+        </li>
+        <li v-link="{path:'/changenum'}">
+          <my-item :title="'更改手机号'" :urlnum="3"></my-item>
+        </li>
+        <li class="block" v-link="{path:'/binding'}">
+          <my-item :title="'工号绑定'" :urlnum="4"></my-item>
+        </li>
+        <li v-link="{path:'/blockade'}">
+          <my-item :title="'文学闯关'" :urlnum="5"></my-item>
+        </li>
+        <li class="block" v-link="{path:'/walking'}">
+          <my-item :title="'健步走'" :urlnum="6"></my-item>
+        </li>
+        <li v-link="{path:'/rules'}">
+          <my-item :title="'约稿规则'" :urlnum="7"></my-item>
+        </li>
+      </ul>
+    </div>
+  </div>
+</template>
+<script type="text/javascript">
+import myItem from '../MyItem/MyItem.vue';
+export default{
+  data () {
+    return {
+      my: Object
+    };
+  },
+  vuex: {
+    getters: {
+      prefix: ({ user }) => user.prefix,
+      openid: ({ user }) => user.userInfo.openid
+    }
+  },
+  created () {
+    this.$http.post(this.prefix + 'User/Wechat/getmy', {openid: this.openid})
+    .then(res => {
+      this.my = res.body.resData;
+    });
+  },
+  components: {
+    myItem
+  }
+};
+</script>
+<style lang="stylus">
+.my
+  position: absolute
+  top: 0
+  bottom: 49px
+  z-index: -1
+  width: 100%
+  background-color: #f0f0f5
+.myContainer
+  height: 445px
+  .topBg
+    width: 100%
+    height: 139px
+    background: url(375x139.png) left top no-repeat
+    background-size: 100% 100%
+  .avatar
+    position: absolute
+    top: 86px
+    left: 50%
+    margin-left: -37px
+    width: 74px
+    height: 74px
+    border-radius: 50%
+    border: 1px solid #fff
+    img
+      width: 100%
+      height: 100%
+      border-radius: 50%
+  .nickName
+    padding-top: 35px
+    font-size: 14px
+    color: #646464
+    background-color: #fff
+    text-align: center
+  .optionContainer
+    margin-top: -3px
+    padding-bottom: 49px
+    width: 100%
+    background-color: #f0f0f5
+    .first
+      margin: 0
+      padding: 0
+      li
+        list-style: none
+        background-color: #fff
+        &.block
+          margin-bottom: 10px
+</style>

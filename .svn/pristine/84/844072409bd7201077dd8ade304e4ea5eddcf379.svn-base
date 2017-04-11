@@ -1,0 +1,38 @@
+import Vue from 'vue';
+import App from './App';
+import VueResource from 'vue-resource';
+import Home from './page/Home/Home.vue';
+import Activity from './components/Activity/Activity.vue';
+import News from './components/News/News.vue';
+import Rights from './components/Rights/Rights.vue';
+import My from './components/My/My.vue';
+import VueRouter from 'vue-router';
+
+Vue.use(VueRouter);
+Vue.use(VueResource);
+
+var router = new VueRouter({
+  linkActiveClass: 'active'
+});
+
+router.map({
+  '/': {
+    component: Home,
+    subRoutes: {
+      'activity': {
+        component: Activity
+      },
+      'news': {
+        component: News
+      },
+      'rights': {
+        component: Rights
+      },
+      'my': {
+        component: My
+      }
+    }
+  }
+});
+
+router.start(App, '#app');

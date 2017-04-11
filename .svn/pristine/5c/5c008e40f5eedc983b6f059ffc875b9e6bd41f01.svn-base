@@ -1,0 +1,133 @@
+<template>
+  <div class="vote">
+    <div class="background">
+      <vote-detail :detail-item="voteDetail"></vote-detail>
+      <vote-item :vote-items="voteItems"></vote-item>
+      <div class="submitBtnContainer">
+        <div class="submitBtn" :class="{'voted': voted}" @click="voteSub()">{{btnHtml}}</div>
+      </div>
+      <ul class="voteOption">
+        <li v-for="voteItem in voteItems">
+          <vote-option :voteitem="voteItem" :votenum="$index"></vote-option>
+        </li>
+      </ul>
+    </div>
+  </div>
+</template>
+<script>
+import voteDetail from '../../components/DetailInfoItem/DetailInfoItem.vue';
+import voteItem from '../../components/VoteItem/VoteItem.vue';
+import voteOption from '../../components/VoteOption/VoteOption.vue';
+export default {
+  components: {
+    voteDetail,
+    voteItem,
+    voteOption
+  },
+  data () {
+    return {
+      voteDetail: {},
+      voteItems: [],
+      chosenId: '',
+      voted: false,
+      timeStamp: '',
+      now: 0
+    };
+  },
+  computed: {
+    btnHtml () {
+      if (!this.voted) {
+        return '立即投票';
+      } else if (this.now > this.timeStamp) {
+        return '投票已结束';
+      } else {
+        return '已投票';
+      }
+    }
+  },
+  vuex: {
+    getters: {
+      prefix: ({ user }) => user.prefix,
+      openid: ({ user }) => user.userInfo.openid
+    }
+  },
+  created () {
+    this.$toast.config({
+      position: 'center center',
+      duration: 1000
+    });
+    this.now = new Date().getTime();
+    this.$http.post(this.prefix + '/vote', { openid: this.openid }).then(res => {
+      console.log(res.body.resData.voteOptions);
+      if (res.body.message !== '') {
+        window.alert('暂无活动');
+        this.$router.go('/activity');
+      }
+      this.voteItems = res.body.resData.voteOptions;
+      this.voteDetail = res.body.resData.voteDetail;
+      this.voted = res.body.resData.voted;
+      this.timeStamp = res.body.resData.timeStamp;
+    });
+    this.$on('option', (id) => {
+      console.log(id);
+      this.chosenId = id;
+    });
+  },
+  methods: {
+    voteSub () {
+      if (this.voted || this.now < this.timeStamp) {
+        return;
+      } else if (this.chosenId === '') {
+        this.$toast.error('请选择至少一项');
+        return;
+      }
+      this.$http.post(this.prefix + '/voteUser', {activeId: this.voteDetail.activeId, openid: this.openid, optionId: this.chosenId}).then(res => {
+        this.$toast.success('投票成功');
+        setTimeout(() => {
+          this.$router.go(0);
+        }, 1500);
+      });
+    }
+  }
+};
+</script>
+<style lang="stylus">
+.vote
+  position: absolute
+  top: 0
+  bottom: 0
+  background: #ffffff
+  width: 100% 
+  .background
+    background: #fff
+    .submitBtnContainer
+      display: flex
+      justify-content: center
+      align-items: center
+      height: 91px
+      .submitBtn
+        display: flex
+        justify-content: center
+        align-items: center
+        box-sizing: border-box
+        width: 275px
+        height: 44px
+        border-radius: 22px
+        border: none
+        color: #fff
+        background: linear-gradient(90deg, #fc556b, #ef2f48)
+        box-shadow: 0 1px 8px rgba(246, 67, 91, 0.6)
+        &.voted
+          background: #ccc
+          box-shadow: none
+    .voteOption
+      padding: 0
+      margin: 0
+      list-style: none
+      li
+        padding: 0 32px
+        padding-bottom: 15px
+        box-sizing: border-box
+        
+
+</style>

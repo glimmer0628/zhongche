@@ -1,0 +1,132 @@
+<template>
+  <div class="doneBlockadeContainer">
+    <ul class="doneBlockRow" v-for="rowArr in doneBlocks">
+      <li class="doneBlockItem" v-for="doneItem in rowArr">
+        <div class="blockContainer" @click="chosenThis(doneItem)" :class="{'done': doneItem.done, 'chosen': doneItem.chosen}">{{ unlock(doneItem) }}</div>
+      </li>
+    </ul>
+    <div class="checkBtnContainer">
+      <div class="checkBtn" @click="checkMyBlock()">查看</div>
+    </div>
+  </div>
+</template>
+<script>
+  export default {
+    data () {
+      return {
+        doneBlocks: []
+      };
+    },
+    vuex: {
+      getters: {
+        prefix: ({ user }) => user.prefix,
+        openid: ({ user }) => user.userInfo.openid
+      }
+    },
+    methods: {
+      compare (property) {
+        return (a, b) => {
+          let value1 = a[property];
+          let value2 = b[property];
+          return value1 - value2;
+        };
+      },
+      unlock (doneItem) {
+        if (doneItem.done === true) {
+          return doneItem.num;
+        }
+        return;
+      },
+      chosenThis (doneItem) {
+        this.doneBlocks.forEach(parentItem => {
+          parentItem.forEach(item => {
+            item.chosen = false;
+          });
+        });
+        doneItem.chosen = true;
+      },
+      checkMyBlock () {
+        this.doneBlocks.forEach(parentItem => {
+          parentItem.forEach(item => {
+            if (item.chosen === true && item.done === true) {
+              this.$router.go({ path: '/blockade', query: {num: item.num} });
+            }
+          });
+        });
+      }
+    },
+    created () {
+      this.$http.get(this.prefix + '/doneblock', {openid: this.openid})
+      .then(res => {
+        res.body.resData.doneBlocks.sort(this.compare('num'));
+        let resArr = [];
+        let arrLen = res.body.resData.doneBlocks.length;
+        for (let i = 0; i < Math.ceil(arrLen / 3); i++) {
+          let rowArr = [];
+          for (let j = 0; j < 3; j++) {
+            if (res.body.resData.doneBlocks[i * 3 + j]) {
+              res.body.resData.doneBlocks[i * 3 + j].chosen = false;
+              rowArr.push(res.body.resData.doneBlocks[i * 3 + j]);
+            }
+          }
+          resArr.push(rowArr);
+        }
+        this.doneBlocks = resArr;
+      });
+    }
+  };
+</script>
+<style lang="stylus">
+  .doneBlockadeContainer
+    padding-top: 40px
+    width: 100%
+    .doneBlockRow
+      display: flex
+      justify-content: center
+      margin: 0
+      padding: 0
+      margin-bottom: 30px
+      &:last-child
+        margin-bottom: 0
+      .doneBlockItem
+        display: flex
+        justify-content: center
+        flex: 1
+        list-style: none
+        .blockContainer
+          display: flex
+          justify-content: center
+          align-items: center
+          width: 57px
+          height: 57px
+          color: #999
+          background: url(lockIcon.png) left top no-repeat
+          background-size: 100% 100%
+          box-sizing: border-box
+          font-size: 23px
+          border-radius: 8px
+          &.done
+            color: #ef2f48
+            border: 1px solid #ef2f48
+            background: #FFF
+            &.chosen
+              color: #fff
+              border: none
+              background: linear-gradient(90deg, #fc556b, #ef2f48);
+    .checkBtnContainer
+      display: flex
+      justify-content: center
+      margin-top: 40px
+      .checkBtn
+        display: flex
+        justify-content: center
+        align-items: center
+        box-sizing: border-box
+        width: 275px
+        height: 44px
+        border-radius: 22px
+        border: none
+        color: #fff
+        background: linear-gradient(90deg, #fc556b, #ef2f48)
+        box-shadow: 0 1px 8px #f6435b
+</style>

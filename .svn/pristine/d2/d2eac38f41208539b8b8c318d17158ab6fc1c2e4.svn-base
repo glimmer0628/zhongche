@@ -1,0 +1,12 @@
+<template>
+  <div class="my">
+    my
+  </div>
+</template>
+<script type="text/javascript">
+export default{
+};
+</script>
+<style lang="stylus">
+  
+</style>

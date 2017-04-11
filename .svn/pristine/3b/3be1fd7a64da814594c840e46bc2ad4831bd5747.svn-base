@@ -1,0 +1,78 @@
+<template>
+  <div class="activity">
+    <div class="activeTop">
+      <span class="activeNotice" @click="switchNotice()" :class="{'active':notice}">活动通知</span>
+      <span class="activeReport" @click="switchReport()" :class="{'active':!notice}">活动报道</span>
+    </div>
+    <ul class="activeContainer">
+      <li v-for="activeInfo in activeInfos">
+        <active-item :activeinfo="activeInfo"></active-item>
+      </li>
+    </ul>
+    <search></search>
+  </div>
+</template>
+<script type="text/javascript">
+import activeItem from '../ActiveItem/ActiveItem.vue';
+import search from '../Search/Search.vue';
+export default{
+  data () {
+    return {
+      activeInfos: [],
+      notice: true
+    };
+  },
+  methods: {
+    switchNotice () {
+      this.notice = true;
+    },
+    switchReport () {
+      this.notice = false;
+    }
+
+  },
+  created () {
+    this.$http.get('http://rap.taobao.org/mockjsdata/15673/activeinfo')
+    .then(res => {
+      if (this.activeInfos.length !== 0) {
+        this.activeInfos = [];
+      }
+      res.body.reData.activeInfo.forEach((item) => {
+        item.done = false;
+        this.activeInfos.push(item);
+      });
+    });
+  },
+  components: {
+    activeItem,
+    search
+  }
+};
+</script>
+<style lang="stylus">
+  .activeTop
+    height: 40px
+    width: 100%
+    line-height:40px
+    .activeNotice
+      margin-left:100px
+      margin-right:53px
+      font-size:14px
+      color:#323232
+    .activeReport
+      font-size:14px
+      color:#323232
+    .active
+      font-size:16px
+      color:#ef2f48
+  .activeContainer
+    position: absolute
+    top: 40px
+    margin: 0
+    padding: 0
+    margin-bottom: 49px
+    width: 100%
+    li
+      font-size: 12px
+      list-style: none
+</style>

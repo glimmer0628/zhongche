@@ -1,0 +1,115 @@
+<template>
+  <div class="news">
+    <ul class="newsTop">
+      <li @click="switchNews(1)">
+        <div class="news_img"><img src="icon.png"></div>
+        <span>每周一讲</span>
+      </li>
+      <li @click="switchNews(2)">
+        <div class="news_img"><img src="icon.png"></div>
+        <span>往期回顾</span>
+      </li>
+      <li @click="switchNews(3)">
+        <div class="news_img"><img src="icon.png"></div>
+        <span>生活百科</span>
+      </li>
+      <li>
+        <div class="news_img"><img src="icon.png"></div>
+        <span>职工书屋</span>
+      </li>
+    </ul>
+    <ul class="newsContent">
+      <li v-for="reportInfo in reportInfos">
+        <report-item :reportinfo="reportInfo"></report-item>
+      </li>
+    </ul>
+    <div class="loading" v-show="onLoading">
+      <img src="timg.gif" height="80" width="80">
+    </div>
+  </div>
+</template>
+<script type="text/javascript">
+import reportItem from '../ReportItem/ReportItem.vue';
+export default{
+  components: {
+    reportItem
+  },
+  data () {
+    return {
+      reportInfos: [],
+      onLoading: false
+    };
+  },
+  vuex: {
+    getters: {
+      prefix: ({ user }) => user.prefix
+    }
+  },
+  methods: {
+    switchNews (num) {
+      this.onLoading = true;
+      this.$http.get(this.prefix + '/getnews', {type: num}).then(res => {
+        this.reportInfos = res.body.resData.news;
+        window.scrollTo(0, 0);
+        this.onLoading = false;
+      });
+    }
+  },
+  created () {
+    this.onLoading = true;
+    this.$http.get(this.prefix + '/getnews', {type: 1}).then(res => {
+      this.reportInfos = res.body.resData.news;
+      this.onLoading = false;
+    });
+  }
+};
+</script>
+<style lang="stylus">
+  .news
+    margin-bottom: 49px
+    width: 100%
+    background: #F0F0F5
+    .newsTop
+      padding: 0
+      margin: 0
+      height: 110px
+      width: 100%
+      display:flex
+      justify-content:space-around
+      background: #ffffff
+      li
+        list-style: none
+        flex-direction: column
+        justify-content: center
+        width: 53px
+        margin-top: 16px
+        .news_img
+          width: 52px
+          height: 52px
+          border-radius: 5px
+          background: #f2f2f2
+          margin-bottom:5px
+          text-align: center
+          line-height: 52px
+          img
+            width: 31px
+            height: 31px
+            vertical-align: middle  
+        span
+          font-size: 12px
+    .newsContent
+      padding: 0
+      margin: 0
+      margin-top: 8px
+      background: #ffffff
+      &>li
+        list-style: none
+    .loading
+      position: absolute
+      top: 0
+      bottom: 49px
+      display: flex
+      justify-content: center
+      align-items: center
+      width: 100%
+</style>

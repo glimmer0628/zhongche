@@ -1,0 +1,106 @@
+<template>
+  <div class="Vote">
+    <div class="votecontant">
+      <div class="voteTop">请开始投票</div>
+      <div class="voteContent">
+        <div class="voteTitle">
+          标题标题标题标题标题标题标题标题标题（单选）
+        </div>
+        <ul class="voteOption">
+          <li @click="choose(item)" v-for="item in data">
+            <span class="icon" :class="{'active': item.choose}"></span>
+            <span class="num">{{ $index + 1 }}</span>
+            <span class="content">{{ item.name }}</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+export default {
+  data () {
+    return {
+      data: [
+        {
+          name: 'mingzi',
+          choose: false
+        },
+        {
+          name: 'mingzi',
+          choose: false
+        },
+        {
+          name: 'mingzi',
+          choose: false
+        },
+        {
+          name: 'mingzi',
+          choose: false
+        },
+        {
+          name: 'mingzi',
+          choose: false
+        }
+      ]
+    };
+  },
+  methods: {
+    choose (item) {
+      this.data.forEach(one => {
+        one.choose = false;
+      });
+      item.choose = true;
+    }
+  }
+};
+</script>
+<style lang="stylus">
+.Vote
+  position: absolute
+  top: 0
+  bottom: 0
+  background: #ffffff
+  width: 100%
+  .votecontant
+    border: 1px solid #cccccc
+    box-sizing: border-box
+    margin: 0 32px
+    border-radius: 5px
+    color: #999999
+    .voteTop
+      height: 55px
+      width: 100%
+      font-size: 16px
+      line-height: 55px
+      text-align: center
+      border-bottom: 1px solid #cccccc
+    .voteContent
+      padding: 0 12px
+      box-sizing: border-box
+      .voteTitle
+        margin: 20px 0
+      .voteOption
+        padding: 0
+        margin: 0
+        list-style: none
+        li
+          height: 40px
+          border-bottom: 1px solid #cccccc
+          display: flex
+          align-items: center
+          &:last-child
+            border-bottom: 0
+          .icon
+            display: inline-block
+            width: 22px
+            height: 22px
+            background: url(choose.png)
+            background-size: 100% 100%
+            margin-right: 5px
+            &.active
+              background-image: url(choose1.png)
+          .num
+            margin-right: 8px
+          
+</style>

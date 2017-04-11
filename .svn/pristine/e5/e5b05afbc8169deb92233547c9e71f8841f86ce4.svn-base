@@ -1,0 +1,62 @@
+<template>
+  <div class="detailInfoItem">
+    <div class="headContainer">
+      <div class="title">{{ detailItem.title }}</div>
+      <div class="time">{{ detailItem.time }}</div>
+    </div>
+    <div class="container" v-if="detailItem.video_url">
+        <iframe height=170 width='100%' :src="detailItem.video_url" frameborder=0 'allowfullscreen'></iframe>
+    </div>
+    <div class="infoContainer" v-html="detailItem.info"></div>
+  </div>
+</template>
+<script>
+  import myVideo from 'vue-video';
+  export default {
+    props: {
+      detailItem: Object
+    },
+    data () {
+      return {
+        // video_url: 'http://player.youku.com/embed/XMjY3MjU1ODAwNA==',
+        video: {
+          sources: [{
+            src: 'http://covteam.u.qiniudn.com/oceans.mp4',
+            type: 'video/mp4'
+          }],
+          options: {
+            autoplay: false,
+            volume: 0.6,
+            poster: 'http://covteam.u.qiniudn.com/poster.png'
+          }
+        }
+      };
+    },
+    components: {
+      myVideo
+    }
+  };
+</script>
+<style lang="stylus">
+  .detailInfoItem
+    margin-top: 19px
+    background-color: #FFF
+    .headContainer
+      margin-bottom: 20px
+      padding: 0 12px
+      .title
+        margin-bottom: 9px
+        font-size: 16px
+        color: #323232
+      .time
+        font-size: 9px
+        color: #b4b4b4
+    .infoContainer
+      color: #353535
+      font-size: 14px
+      p
+        padding: 0 12px
+        line-height: 1.3!important
+      img
+        width: 100%
+</style>

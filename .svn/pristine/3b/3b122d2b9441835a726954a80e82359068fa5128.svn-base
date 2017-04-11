@@ -1,0 +1,12 @@
+<template>
+  <div class="points">
+    points
+  </div>
+</template>
+<script>
+  export default {
+  };
+</script>
+<style lang="stylus">
+  
+</style>

@@ -1,0 +1,144 @@
+<template>
+  <div class="changeNum">
+    <ul class="bindConatiner">
+      <li>
+        <input-item :place-text="'请输入新手机号'" :type="'phoneNum'"></input-item>
+      </li>
+      <li class="getNumBox">
+        <input-item :place-text="'请输入验证码'" :type="'verify'"></input-item>
+        <div class="getNum">
+          <verify-num :phone-num="phoneNum"></verify-num>
+        </div>
+      </li>
+    </ul>
+    <div class="btnContainer">
+      <div class="changeBtn" @click="changeNum()">修改</div>
+    </div>
+    <div class="loading" v-show="loading">
+      <img src="./timg.gif" height="80" width="80">
+    </div>
+  </div>
+</template>
+<script>
+  import inputItem from '../../components/InputItem/InputItem.vue';
+  import verifyNum from '../../components/VerifyNum/VerifyNum.vue';
+  export default {
+    data () {
+      return {
+        phoneNum: '',
+        verify: '',
+        loading: false
+      };
+    },
+    vuex: {
+      getters: {
+        prefix: ({ user }) => user.prefix,
+        openid: ({ user }) => user.userInfo.openid
+      }
+    },
+    components: {
+      inputItem,
+      verifyNum
+    },
+    methods: {
+      changeNum () {
+        this.loading = true;
+        let phoneReg = new RegExp('^((13[0-9])|(14[5|7])|(15([0-3]|[5-9]))|(18[0,5-9]))\\d{8}$');
+        let verifyReg = new RegExp('^\\d{6}$');
+        if (phoneReg.test(this.phoneNum)) {
+          if (verifyReg.test(this.verify)) {
+            this.$http.get(this.prefix + '/changenum', {openid: this.openid, phoneNum: this.phoneNum, verify: this.verify})
+            .then(res => {
+              this.loading = false;
+              switch (res.body.resData.result_msg) {
+                case 0:
+                  this.$toast.success('申请修改手机号成功');
+                  setTimeout(() => {
+                    this.$router.go('/my');
+                  }, 2000);
+                  break;
+                case 1:
+                  this.$toast.error('该手机号已被绑定');
+                  break;
+                case 2:
+                  this.$toast.error('还未绑定工号，请绑定');
+                  setTimeout(() => {
+                    this.$router.go('/binding');
+                  }, 2000);
+                  break;
+                case 3:
+                  this.$toast.error('验证码错误');
+              };
+            });
+          } else {
+            this.$toast.error('请输入的验证码格式不正确');
+          }
+        } else {
+          this.$toast.error('请输入正确的手机号');
+        };
+      }
+    },
+    created () {
+      this.$toast.config({
+        position: 'center center',
+        duration: 1500
+      });
+      this.$on('phoneNum', (num) => {
+        this.phoneNum = num;
+      });
+      this.$on('verify', (num) => {
+        this.verify = num;
+      });
+      this.$on('loading', () => {
+        this.loading = true;
+      });
+      this.$on('loaded', () => {
+        this.loading = false;
+      });
+    }
+  };
+</script>
+<style lang="stylus">
+  @import '../../../static/css/border-1px.styl'
+  .bindConatiner
+    margin: 0
+    padding: 0
+    margin-top: 10px
+    padding: 0 12px
+    background-color: #FFF
+    li
+      list-style: none
+      border-1px-bot('#e6e7eb')
+      &:last-child
+        background: none
+      &.getNumBox
+        position: relative
+        .getNum
+          position: absolute
+          top: 50%
+          margin-top: -15px
+          right: 0
+  .btnContainer
+    display: flex
+    justify-content: center
+    align-items: center
+    height: 91px
+    .changeBtn
+      display: flex
+      justify-content: center
+      align-items: center
+      box-sizing: border-box
+      width: 275px
+      height: 44px
+      border-radius: 22px
+      border: none
+      color: #fff
+      background: linear-gradient(90deg, #fc556b, #ef2f48)
+      box-shadow: 0 1px 8px rgba(246, 67, 91, 0.6)
+  .loading
+    position: fixed
+    left: 50%
+    top: 50%
+    margin-top: -40px
+    margin-left: -40px
+</style>

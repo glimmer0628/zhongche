@@ -1,0 +1,26 @@
+// vuex/modules/index.js
+import {
+  CHANGE_PRICE,
+  DECREASE_PRICE
+} from '../mutation-types';
+
+// 该模块的初始状态
+const state = {
+  prefix: 'http://rap.taobao.org/mockjsdata/15673',
+  user: 1
+};
+
+// 相关的 mutations
+const mutations = {
+  [CHANGE_PRICE] (state) {
+    state.count++;
+  },
+  [DECREASE_PRICE] (state) {
+    state.count--;
+  }
+};
+
+export default {
+  state,
+  mutations
+};

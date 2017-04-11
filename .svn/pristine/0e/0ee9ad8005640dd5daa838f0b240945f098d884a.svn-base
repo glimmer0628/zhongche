@@ -1,0 +1,55 @@
+<template>
+  <div class="enroll">
+    <ul class="enrollContainer">
+      <li class="enrollLi" v-for="activeInfo in activeInfos">
+        <active-item :activeinfo="activeInfo"></active-item>
+      </li>
+    </ul>
+  </div>
+</template>
+<script>
+  import activeItem from '../../components/ActiveItem/ActiveItem.vue';
+  export default {
+    data () {
+      return {
+        activeInfos: []
+      };
+    },
+    vuex: {
+      getters: {
+        prefix: ({ user }) => user.prefix,
+        openid: ({ user }) => user.userInfo.prefix
+      }
+    },
+    created () {
+      this.$http.get(this.prefix + '/activeinfo', {openid: this.openid})
+      .then(res => {
+        let resArr = [];
+        res.body.resData.activeInfo.forEach(item => {
+          if (item.done === true) {
+            resArr.push(item);
+          }
+        });
+        this.activeInfos = resArr;
+      });
+    },
+    components: {
+      activeItem
+    }
+  };
+</script>
+<style lang="stylus">
+.enroll
+  position: absolute
+  top: 0
+  bottom: 0
+  width: 100%
+  background-color: #f0f0f5
+  .enrollContainer
+    margin: 0
+    padding: 0
+    background-color: #f0f0f5
+    .enrollLi
+      margin-bottom: 10px
+      list-style: none
+</style>

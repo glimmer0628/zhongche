@@ -1,0 +1,41 @@
+<template>
+  <div class="detailInfo">
+    <detail-info-item :detail-item="detailInfo"></detail-info-item>
+  </div>
+</template>
+<script>
+  import detailInfoItem from '../../components/DetailInfoItem/DetailInfoItem.vue';
+  export default {
+    data () {
+      return {
+        detailInfo: {}
+      };
+    },
+    vuex: {
+      getters: {
+        prefix: ({ user }) => user.prefix
+      }
+    },
+    created () {
+      // this.$http.get(this.prefix + '/newsdetail', {infoid: this.$route.params})
+      // .then(res => {
+      //   this.detailInfo = res.body.resData;
+      // });
+      this.$http.get('http://192.168.3.155/zhongche/api.php?s=/News/Wechat/newsdetail')
+      .then(res => {
+        this.detailInfo = res.body.resData;
+      });
+    },
+    components: {
+      detailInfoItem
+    }
+  };
+</script>
+<style lang="stylus">
+  .detailInfo
+    position: absolute
+    top: 0
+    bottom: 0
+    width: 100%
+    background-color: #FFF
+</style>

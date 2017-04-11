@@ -1,0 +1,30 @@
+<template>
+  <div class="rules">
+    <div class="htmlContainer" v-html="html">
+    </div>
+  </div>
+</template>
+<script>
+  export default {
+    data () {
+      return {
+        html: ''
+      };
+    },
+    vuex: {
+      getters: {
+        prefix: ({ user }) => user.prefix
+      }
+    },
+    created () {
+      this.$http.post(this.prefix + 'News/Wechat/newsdetail')
+      .then(res => {
+        this.html = res.body.resData.info;
+      });
+    }
+  };
+</script>
+<style lang="stylus">
+  .rules
+    padding: 20px 12px 0 12px
+</style>

@@ -1,0 +1,75 @@
+<template>
+  <div class="verifyNum" @click="gettingNumber()" :class="{'gettingNum': gettingNum}">
+    {{ !gettingNum ? '获取验证码' : `重新获取${regetNum}s` }}
+  </div>
+</template>
+<script>
+  export default {
+    props: {
+      phoneNum: String
+    },
+    data () {
+      return {
+        gettingNum: false,
+        regetNum: 60,
+        limitNum: 0
+      };
+    },
+    vuex: {
+      getters: {
+        prefix: ({ user }) => user.prefix
+      }
+    },
+    methods: {
+      gettingNumber () {
+        if (this.$cookie.get('limitTime') !== 'true') {
+          let phoneReg = new RegExp('^1(3|4|5|7|8)\\d{9}$');
+          if (!phoneReg.test(this.phoneNum)) {
+            this.$toast.error('请输入正确的手机号');
+          } else {
+            if (this.limitNum < 5) {
+              this.limitNum++;
+              if (!this.gettingNum) {
+                this.$dispatch('loading');
+                this.$http.post('http://192.168.3.155/zhongche/api.php?s=/user/wechat/getverify', {phoneNum: this.phoneNum})
+                .then(res => {
+                  if (res.body.resData.result_msg === 'ok') {
+                    this.$dispatch('loaded');
+                    this.gettingNum = !this.gettingNum;
+                    let time = setInterval(() => {
+                      this.regetNum--;
+                      if (this.regetNum === 0) {
+                        this.regetNum = 60;
+                        this.gettingNum = !this.gettingNum;
+                        clearInterval(time);
+                      }
+                    }, 1000);
+                  }
+                });
+              }
+            } else {
+              this.$cookie.set('limitTime', 'true', 1);
+              this.$toast.error('超过限制，冻结一天');
+            }
+          }
+        } else {
+          this.$toast.error('超过限制，冻结一天');
+        };
+      }
+    }
+  };
+</script>
+<style lang="stylus">
+  .verifyNum
+    display: flex
+    justify-content: center
+    align-items: center
+    width: 70px
+    height: 30px
+    color: #fff
+    background-color: #ef2f48
+    border-radius: 8px
+    font-size: 11px
+    &.gettingNum
+      background-color: #ccc
+</style>

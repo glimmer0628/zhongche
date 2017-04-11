@@ -1,0 +1,32 @@
+// vuex/modules/index.js
+import {
+  SAVE_LOCATION,
+  SAVE_OPENID
+} from '../mutation-types';
+
+// 该模块的初始状态
+const state = {
+  prefix: 'http://rap.taobao.org/mockjsdata/15673',
+  userInfo: {
+    openid: '123456'
+  },
+  location: {
+    lat: 39.915,
+    lug: 116.404
+  }
+};
+
+// 相关的 mutations
+const mutations = {
+  [SAVE_OPENID] (state, openid) {
+    state.userInfo.openid = openid;
+  },
+  [SAVE_LOCATION] (state, location) {
+    state.location = location;
+  }
+};
+
+export default {
+  state,
+  mutations
+};
